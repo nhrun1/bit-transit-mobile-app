@@ -1,0 +1,81 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+// Đặt ở đầu file build.gradle (sau plugins {...})
+def keystorePropertiesFile = rootProject.file("android/key.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace = "com.example.bit_transit"
+    compileSdk = 35
+    ndkVersion = "25.1.8937393"
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        applicationId = "com.example.bit_transit"
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+    flavorDimensions "env"
+    productFlavors {
+        dev {
+            dimension "env"
+            applicationIdSuffix ".dev"
+            versionNameSuffix "-dev"
+            versionCode 1
+            versionName "1.0.0"
+            manifestPlaceholders = [ appName: "Bit Transit (Dev)" ]
+        }
+        prod {
+            dimension "env"
+            versionCode 1
+            versionName "1.0.0"
+            manifestPlaceholders = [ appName: "Bit Transit" ]
+        }
+    }
+    signingConfigs {
+        release {
+            if (keystoreProperties['IO_RELEASE_KEY_PATH']) {
+                storeFile file(keystoreProperties['IO_RELEASE_KEY_PATH'])
+            }
+            storePassword keystoreProperties['IO_RELEASE_STORE_PASSWORD']
+            keyAlias keystoreProperties['IO_RELEASE_KEY_ALIAS']
+            keyPassword keystoreProperties['IO_RELEASE_KEY_PASSWORD']
+        }
+    }
+    buildTypes {
+        debug {
+            applicationIdSuffix ".debug"
+            versionNameSuffix "-debug"
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+            shrinkResources false
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled true
+            shrinkResources true
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
